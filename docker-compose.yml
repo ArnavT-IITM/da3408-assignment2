@@ -1,0 +1,15 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: spam-api:multistage
+    ports:
+      - "8080:8080"
+    environment:
+      REDIS_HOST: cache
+    depends_on:
+      - cache
+
+  cache:
+    image: redis:7-alpine
