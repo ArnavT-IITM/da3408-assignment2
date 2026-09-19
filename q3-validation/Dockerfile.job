@@ -1,0 +1,13 @@
+# --- Stage 1: build ---
+FROM python:3.10 AS builder
+WORKDIR /build
+COPY requirements.txt .
+RUN pip install --no-cache-dir --target=/build/deps -r requirements.txt
+
+# --- Stage 2: minimal runtime ---
+FROM python:3.10-slim
+WORKDIR /app
+COPY --from=builder /build/deps /usr/local/lib/python3.10/site-packages
+COPY train_worker.py .
+COPY data/ml_job_dataset.csv ./data/ml_job_dataset.csv
+CMD ["python", "train_worker.py"]
