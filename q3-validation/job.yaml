@@ -1,19 +1,19 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: hp-search-job-multinode
+  name: shard-validation-job
   labels:
-    app: hp-search
+    app: shard-validation
 spec:
-  completions: 12
-  parallelism: 6
+  completions: 8
+  parallelism: 4
   completionMode: Indexed
   backoffLimit: 4
   activeDeadlineSeconds: 600
   template:
     metadata:
       labels:
-        app: hp-search
+        app: shard-validation
     spec:
       restartPolicy: Never
       topologySpreadConstraints:
@@ -22,14 +22,14 @@ spec:
         whenUnsatisfiable: ScheduleAnyway
         labelSelector:
           matchLabels:
-            app: hp-search
+            app: shard-validation
       containers:
       - name: worker
-        image: hp-search-worker:latest
+        image: shard-validator:v1
         imagePullPolicy: IfNotPresent
         env:
-        - name: DATA_PATH
-          value: "/app/data/ml_job_dataset.csv"
+        - name: HOLD_SECONDS
+          value: "20"
         - name: POD_NAME
           valueFrom:
             fieldRef:
@@ -40,8 +40,8 @@ spec:
               fieldPath: spec.nodeName
         resources:
           requests:
-            cpu: "900m"
+            cpu: "500m"
             memory: "256Mi"
           limits:
-            cpu: "1000m"
-            memory: "512Mi"
+            cpu: "500m"
+            memory: "256Mi"
